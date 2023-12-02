@@ -4,7 +4,7 @@ input <- readLines("day_02/00_input/input.txt")
 
 colours <- c("red", "green", "blue")
 
-# Function to extract number of cube number from each set
+# Function to extract number of cube number from each set in a data frame
 tbl_cube <- function(game) {
   lapply(game,
          function(set){
@@ -44,12 +44,9 @@ processed_input <- tibble(
     info_extract = lapply(info, tbl_cube),
     .keep = "unused")
 
-
-
+#2727
 processed_input |>
   mutate(passed = lapply(info_extract, filter_condition) |> as.logical()) |>
   filter(passed) |>
   pull(id) |>
   sum()
-
-
