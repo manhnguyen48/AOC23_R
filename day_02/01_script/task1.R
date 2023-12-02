@@ -1,5 +1,3 @@
-
-
 library(tidyverse)
 
 input <- readLines("day_02/00_input/input.txt")
