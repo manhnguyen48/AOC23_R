@@ -7,7 +7,7 @@ input <- readLines("day_02/00_input/input.txt")
 colours <- c("red", "green", "blue")
 
 # Function to extract number of cube number from each set
-minmax_cube <- function(game) {
+tbl_cube <- function(game) {
   lapply(game,
          function(set){
            tibble(
@@ -43,7 +43,7 @@ processed_input <- tibble(
     info = str_extract(raw_input, "(?<=\\: ).*") |>
       str_split("\\;"),
     num_sets = str_count(raw_input, ";"),
-    info_extract = lapply(info, minmax_cube),
+    info_extract = lapply(info, tbl_cube),
     .keep = "unused")
 
 
