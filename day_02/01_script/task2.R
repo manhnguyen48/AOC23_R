@@ -17,8 +17,8 @@ tbl_cube <- function(game) {
     dplyr::mutate(dplyr::across(all_of(colours), as.integer))
 }
 
-# Function to check if the info of a game match a specified condition
-# Calculate the max number of cube seen and compare that to a specified set
+# Function to calculate least number of cube to make game possible
+# then take product of all cube colours
 least_cube_power <- function(info_extract) {
   power_level <- dplyr::summarise(info_extract,
                            dplyr::across(all_of(colours), \(x) max(x, na.rm=TRUE))) |>
@@ -43,4 +43,3 @@ processed_input <- tibble(
 lapply(processed_input$info_extract, \(x) least_cube_power(x)) |>
   as.numeric() |>
   sum()
-
