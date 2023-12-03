@@ -45,3 +45,4 @@ processed_input <- tibble(
 lapply(processed_input$info_extract, \(x) least_cube_power(x)) |>
   as.numeric() |>
   sum()
+
