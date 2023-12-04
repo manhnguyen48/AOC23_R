@@ -26,11 +26,7 @@ count_matches <- function(input) {
 count_points <- function(processed_data) {
   processed_data |>
     dplyr::mutate(point = purrr::map_dbl(matches,
-                                         \(x) if (x == 0) {
-                                           0
-                                         } else {
-                                           dplyr::last(2 ^ ((1:x) - 1))
-                                         })) |>
+                                         \(x) ifelse(x==0, 0, 2^(x-1)))) |>
     dplyr::pull(point) |>
     sum()
 }
@@ -41,3 +37,4 @@ testthat::expect_equal(
 )
 #Part 1 Answer: 21105
 count_matches(input) |> count_points()
+
