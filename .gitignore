@@ -49,4 +49,4 @@ po/*~
 rsconnect/
 
 #AOC input
-.txt
+input.txt
