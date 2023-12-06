@@ -19,9 +19,7 @@ process_input <- function(input_text) {
 }
 #Naive algo to count win
 count_win <- function(total_time, record) {
-  sapply(0:total_time,
-         \(x) {(x * (total_time - x))>record}) |>
-    sum()
+  sum((c(1:(total_time-1)) * (total_time-c(1:(total_time-1)))) > record)
 }
 test_input <- process_input(test)
 main_input <- process_input(input)
