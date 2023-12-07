@@ -57,32 +57,27 @@ tie_break <- function(tbl) {
     dplyr::arrange(hand_1, hand_2, hand_3, hand_4, hand_5) |>
     #Reverse the number as bigger
     dplyr::mutate(rank_within = 1:nrow(tbl)) |>
-    dplyr::select(id, rank_within)
+    dplyr::select(id, rank_within, bid)
 }
 #Rank the hand
-rank_hand <- function(tbl, bid_tbl) {
+rank_hand <- function(tbl) {
   tidyr::nest(tbl, .by = hand_name) |>
     dplyr::mutate(
       rank_tbl = lapply(data, \(x) tie_break(x)), .keep = "unused") |>
     tidyr::unnest(rank_tbl) |>
     dplyr::arrange(hand_name, as.numeric(rank_within)) |>
     tibble::rownames_to_column("rank_total") |>
-    dplyr::left_join(bid_tbl, by = "id")  |>
     dplyr::mutate(winning = as.numeric(rank_total) * bid)
 }
 
 test_processed <- process_input(test)
 input_processed <- process_input(input)
 
-testthat::expect_equal(rank_hand(test_processed, select(test_processed, id, bid)) |>
+testthat::expect_equal(rank_hand(test_processed) |>
                          pull(winning) |>
                          sum(),
                        6839)
 #Part 2 Answer: 250825971
-rank_hand(input_processed, select(input_processed, id, bid)) |>
+rank_hand(input_processed) |>
   pull(winning) |>
   sum()
-
-
-
-
