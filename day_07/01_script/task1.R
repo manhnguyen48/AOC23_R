@@ -71,4 +71,3 @@ testthat::expect_equal(
 rank_hand(input_processed) |>
   pull(winning) |>
   sum()
-
