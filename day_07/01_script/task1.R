@@ -33,7 +33,8 @@ process_input <- function(input_text) {
       hand_name = sapply(hand, \(x) classify_hand(x)) |>
         factor(levels = c("High card", "One pair", "Two pair",
                           "Three of a kind", "Full house", "Four of a kind",
-                          "Five of a kind"), ordered = TRUE)) |>
+                          "Five of a kind"), ordered = TRUE),
+      ) |>
     dplyr::select(hand, bid, hand_name) |>
     tibble::rownames_to_column("id")
 }
