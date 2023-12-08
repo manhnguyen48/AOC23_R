@@ -70,4 +70,3 @@ testthat::expect_equal(
 #Part 1 Answer: 251216224
 rank_hand(input_processed) |>
   pull(winning) |>
-  sum()
