@@ -1,6 +1,5 @@
-library(tidyverse)
-
 input <- readLines("day_02/00_input/input.txt")
+test <- readLines("day_02/00_input/test.txt")
 
 colours <- c("red", "green", "blue")
 
@@ -12,41 +11,38 @@ tbl_cube <- function(game) {
              red = stringr::str_extract(set, "\\d+(?= red)"),
              green = stringr::str_extract(set, "\\d+(?= green)"),
              blue = stringr::str_extract(set, "\\d+(?= blue)")
-           )
-         }) |>
+           )}) |>
     dplyr::bind_rows() |>
     dplyr::mutate(dplyr::across(all_of(colours), as.integer))
 }
-
 # Function to check if the info of a game match a specified condition
 # Calculate the max number of cube seen and compare that to a specified set
 filter_condition <- function(info_extract) {
-  cond <- dplyr::summarise(info_extract,
-                   dplyr::across(all_of(colours), \(x) max(x, na.rm=TRUE))) |>
-    dplyr::mutate(
-      red  = red <= 12,
-      green = green  <= 13,
-      blue = blue <= 14
-    ) |>
-    all()
+  max_col <- apply(as.matrix(info_extract), 2, \(x) max(x, na.rm=TRUE))
+  cond <- all(max_col <= c(red = 12, green = 13, blue = 14))
   return(cond)
 }
+#Function to process input
+process_input <- function(input_txt) {
+  tibble::tibble(raw_input = input_txt) |>
+    dplyr::mutate(
+      id = stringr::str_extract(raw_input, "(?<=Game ).*(?=\\:)") |>
+        as.integer() ,
+      info = stringr::str_extract(raw_input, "(?<=\\: ).*") |>
+        stringr::str_split("\\;"),
+      info_extract = lapply(info, tbl_cube),
+      passed = vapply(info_extract, filter_condition,
+                      logical(1), USE.NAMES = FALSE),
+      .keep = "unused")
+}
 
+processed_test <- process_input(test)
+processed_input <- process_input(input)
 
-processed_input <- tibble(
-  raw_input = input,
-) |>
-  mutate(
-    id = str_extract(raw_input, "(?<=Game ).*(?=\\:)") |> as.integer() ,
-    info = str_extract(raw_input, "(?<=\\: ).*") |>
-      str_split("\\;"),
-    num_sets = str_count(raw_input, ";"),
-    info_extract = lapply(info, tbl_cube),
-    .keep = "unused")
+testthat::expect_equal(
+  subset(processed_test, passed, select = id) |> sum(),
+  8
+)
 
-#2727
-processed_input |>
-  mutate(passed = lapply(info_extract, filter_condition) |> as.logical()) |>
-  filter(passed) |>
-  pull(id) |>
-  sum()
+#Answer Part 1: 2727
+subset(processed_input, passed, select = id) |> sum()

@@ -1,6 +1,5 @@
-library(tidyverse)
-
 input <- readLines("day_02/00_input/input.txt")
+test <- readLines("day_02/00_input/test.txt")
 
 colours <- c("red", "green", "blue")
 
@@ -12,37 +11,37 @@ tbl_cube <- function(game) {
              red = stringr::str_extract(set, "\\d+(?= red)"),
              green = stringr::str_extract(set, "\\d+(?= green)"),
              blue = stringr::str_extract(set, "\\d+(?= blue)")
-           )
-         }) |>
+           )}) |>
     dplyr::bind_rows() |>
     dplyr::mutate(dplyr::across(all_of(colours), as.integer))
 }
-
-# Function to calculate least number of cube to make game possible
-# then take product of all cube colours
+# Function to check if the info of a game match a specified condition
+# Calculate the max number of cube seen and compare that to a specified set
 least_cube_power <- function(info_extract) {
-  power_level <- dplyr::summarise(info_extract,
-                                  dplyr::across(all_of(colours),
-                                                \(x) max(x, na.rm = TRUE))) |>
-    as.numeric() |>
-    # Calculate the product of the minimum number of cubes
-    prod()
-  return(power_level)
+  max_col <- apply(as.matrix(info_extract), 2, \(x) max(x, na.rm=TRUE))
+  return(prod(max_col))
+}
+#Function to process input
+process_input <- function(input_txt) {
+  tibble::tibble(raw_input = input_txt) |>
+    dplyr::mutate(
+      id = stringr::str_extract(raw_input, "(?<=Game ).*(?=\\:)") |>
+        as.integer() ,
+      info = stringr::str_extract(raw_input, "(?<=\\: ).*") |>
+        stringr::str_split("\\;"),
+      info_extract = lapply(info, tbl_cube),
+      least_power = vapply(info_extract, least_cube_power,
+                      numeric(1), USE.NAMES = FALSE),
+      .keep = "unused")
 }
 
-processed_input <- tibble(
-  raw_input = input,
-) |>
-  mutate(
-    id = str_extract(raw_input, "(?<=Game ).*(?=\\:)") |> as.integer() ,
-    info = str_extract(raw_input, "(?<=\\: ).*") |>
-      str_split("\\;"),
-    num_sets = str_count(raw_input, ";"),
-    info_extract = lapply(info, tbl_cube),
-    .keep = "unused")
+processed_test <- process_input(test)
+processed_input <- process_input(input)
 
-#56580
-lapply(processed_input$info_extract, \(x) least_cube_power(x)) |>
-  as.numeric() |>
-  sum()
+testthat::expect_equal(
+  sum(processed_test$least_power),
+  2286
+)
 
+#Answer Part 2: 56580
+sum(processed_input$least_power)
