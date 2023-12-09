@@ -35,49 +35,37 @@ classify_hand <- function(hand) {
 process_input <- function(input_text) {
   tibble::tibble(
     input = input_text) |>
-    tidyr::separate(input, into = c("hand", "bid"),
-                    sep = " ") |>
+    tidyr::separate(input, into = c("hand", "bid"), sep = " ") |>
     dplyr::mutate(
       bid = as.numeric(bid),
       hand = lapply(hand, \(x) strsplit(x, "")[[1]] |>
                       factor(levels = c("J", as.character(2:9),
                                         "T", "Q", "K", "A"),
                              ordered = TRUE)),
+      hand_number = vapply(hand, \(x) as.numeric(x) |>
+                             stringr::str_pad(2,"left", "0") |>
+                             paste0(collapse = ""),
+                           character(1)) ,
       hand_name = sapply(hand, \(x) classify_hand(x)) |>
         factor(levels = c("High card", "One pair", "Two pair",
                           "Three of a kind", "Full house", "Four of a kind",
-                          "Five of a kind"), ordered = TRUE)) |>
-    dplyr::select(hand, bid, hand_name) |>
-    tibble::rownames_to_column("id")
+                          "Five of a kind"), ordered = TRUE),
+      hand_rank = paste0(
+        as.character(as.numeric(hand_name)),
+        hand_number) |>
+        as.numeric()
+    ) |>
+    dplyr::arrange(hand_rank) |>
+    dplyr::mutate(winning = bid * row_number()) |>
+    dplyr::select(hand, hand_name, hand_rank, bid, winning)
 }
-#Function to break the tie
-tie_break <- function(tbl) {
-  tidyr::unnest_wider(tbl, hand, names_sep = "_")|>
-    #Sort ascending, tie break by next card
-    dplyr::arrange(hand_1, hand_2, hand_3, hand_4, hand_5) |>
-    #Reverse the number as bigger
-    dplyr::mutate(rank_within = 1:nrow(tbl)) |>
-    dplyr::select(id, rank_within, bid)
-}
-#Rank the hand
-rank_hand <- function(tbl) {
-  tidyr::nest(tbl, .by = hand_name) |>
-    dplyr::mutate(
-      rank_tbl = lapply(data, \(x) tie_break(x)), .keep = "unused") |>
-    tidyr::unnest(rank_tbl) |>
-    dplyr::arrange(hand_name, as.numeric(rank_within)) |>
-    tibble::rownames_to_column("rank_total") |>
-    dplyr::mutate(winning = as.numeric(rank_total) * bid)
-}
+
 
 test_processed <- process_input(test)
 input_processed <- process_input(input)
 
-testthat::expect_equal(rank_hand(test_processed) |>
-                         pull(winning) |>
-                         sum(),
+testthat::expect_equal(sum(test_processed$winning),
                        6839)
+
 #Part 2 Answer: 250825971
-rank_hand(input_processed) |>
-  pull(winning) |>
-  sum()
+sum(input_processed$winning)
