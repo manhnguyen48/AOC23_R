@@ -15,8 +15,8 @@ tbl_cube <- function(game) {
     dplyr::bind_rows() |>
     dplyr::mutate(dplyr::across(all_of(colours), as.integer))
 }
-# Function to check if the info of a game match a specified condition
-# Calculate the max number of cube seen and compare that to a specified set
+# Function to calculate the least cubes to make a game possible
+# take the max number of each cubes ever seen and calculate their product
 least_cube_power <- function(info_extract) {
   max_col <- apply(as.matrix(info_extract), 2, \(x) max(x, na.rm=TRUE))
   return(prod(max_col))
