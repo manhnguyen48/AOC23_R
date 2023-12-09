@@ -1,6 +1,3 @@
-library(tidyverse)
-library(testthat)
-
 input <- readLines("day_05/00_input/input.txt")
 test <- readLines("day_05/00_input/test.txt")
 
