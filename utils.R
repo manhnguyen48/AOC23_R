@@ -32,3 +32,4 @@ set_up_day <- function(day) {
                      file.path(main_dir,
                                paste0(day_folder, "/", "00_input/input.txt")))
 }
+
