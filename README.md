@@ -4,7 +4,7 @@ This is my first year solving Advent of Code puzzles in R. I will try my best to
 
 This is set up as an RStudio Project. The `utils.R` script contains the `set_up_day()` function to help download inputs and set up the folder each day. My session ID is stored as an environment variable in a `.Renviron` file that is not committed to this repo. The input files `input.txt` are not included as it's the author of AOC's IP.
 
-Across all solutions, I try to make use of base R and tidyverse where relevant, add comments where it's not obvious and run my functions through test cases. Below are my reflections on each day:
+Across all solutions, I try to make use of base R and tidyverse where relevant, add comments where it's not obvious and run my functions through test cases. I will try to revisit some days to rework solutions to be more optimal when time allows. Below are my reflections on each day:
 
 ## Day 01
 
