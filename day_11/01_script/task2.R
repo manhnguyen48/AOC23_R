@@ -17,8 +17,6 @@ test_mtx <- parse_input(test)
 #Function to convert galaxy coordinate to Cartesian plane, accounting for the
 #expansion factor
 expand_matrix <- function(mtx, expansion_factor=2) {
-  #Empty matrix to collect the Cartesian coordinate of galaxy
-  coords <- matrix(nrow = sum(mtx == "#"), ncol = 2)
   empty_rows <- rownames(mtx)[apply(mtx, 1, \(x) all(x=="."))] |> as.numeric()
   empty_cols <- colnames(mtx)[apply(mtx, 2, \(x) all(x=="."))] |> as.numeric()
   x <- as.numeric(rownames(mtx))
