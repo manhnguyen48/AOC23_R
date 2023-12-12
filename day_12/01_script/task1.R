@@ -28,7 +28,6 @@ check_config <- function(line, order) {
   perm_unknown = perm_unknown[valid_combo,,drop = FALSE]
   count_valid = 0
   #Replace all ? with our permutations and test the rle encoding
-  print(paste0("Enumering over ", nrow(perm_unknown)))
   for (i in 1:nrow(perm_unknown)) {
     tmp <- line
     tmp[current_unknown] <- perm_unknown[i, ]
@@ -43,8 +42,6 @@ check_config <- function(line, order) {
   return(count_valid)
 }
 
-check_config(parsed_test$gears[[6]], parsed_test$criteria[[6]])
-
 sum(purrr::map2_dbl(
   parsed_test$gears,
   parsed_test$criteria,
@@ -57,4 +54,3 @@ sum(purrr::map2_dbl(
   parsed_input$criteria,
   \(x,y) check_config(x,y)
 ))
-
