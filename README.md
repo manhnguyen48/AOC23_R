@@ -71,3 +71,9 @@ Across all solutions, I try to make use of base R and tidyverse where relevant, 
 -   Part 1 We have another easy day and I have not fallen for the trap. I knew this expansion factor would be ridiculous in part 2 somehow so I made a function to keep track of the indices after expansion then extract all the galaxies' coordinates (`#`). After all the problem is just on a Cartesian plane of coordinates. Base R has a `dist` function that can calculate [Manhattan distance](https://en.wikipedia.org/wiki/Taxicab_geometry) matrix.
 
 -   Part 2 It is so satisfying to just reuse everything in Part 1 and just change one number.
+
+## Day 12
+
+-   Part 1 I was stuck for a while as this problem was quite odd. But after stumbling on the base R function `rle` things become clear. I basically create all permutations of possible values ? could have taken and remove ones that don't satisfy the number of broken gears left. I knew I was walking into a trap but couldn't think of any better way of doing it then.
+
+-   Part 2 I haven't had a chance to complete yet - another day in the office so time is limited
