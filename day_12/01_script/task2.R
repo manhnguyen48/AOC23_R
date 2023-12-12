@@ -22,7 +22,7 @@ parsed_input <- parse_input(input)
 #to R index in some parts
 #https://github.com/AndreaBarghetti/AdventOfCode/blob/main/AoC2023/Day12/
 
-count_seqs_dp <- function(sequence, counts, cache) {
+check_recursive <- function(sequence, counts, cache) {
   key <- paste(sequence, toString(counts))
   if (exists(key, envir = cache)) {
     return(get(key, envir = cache))
@@ -36,7 +36,7 @@ count_seqs_dp <- function(sequence, counts, cache) {
   result <- 0
   if (str_sub(sequence, 1, 1) %in% c(".", "?")) {
     result <-
-      result + count_seqs_dp(str_sub(sequence, 2, -1), counts, cache)
+      result + check_recursive(str_sub(sequence, 2, -1), counts, cache)
   }
   if (str_sub(sequence, 1, 1) %in% c("#", "?")) {
     if (counts[1] <= nchar(sequence) &&
@@ -44,7 +44,7 @@ count_seqs_dp <- function(sequence, counts, cache) {
         (counts[1] == nchar(sequence) ||
          str_sub(sequence, counts[1] + 1, counts[1] + 1) != "#")) {
       result <-
-        result + count_seqs_dp(str_sub(sequence, counts[1] + 2,
+        result + check_recursive(str_sub(sequence, counts[1] + 2,
                                          nchar(sequence)),
                                counts[-1], cache)
     }
@@ -59,11 +59,13 @@ run_counts <- function(input_list) {
   purrr::map2_dbl(
     input_list$gears,
     input_list$criteria,
-    \(x,y) count_seqs_dp(x, y, cache)
+    \(x,y) check_recursive(x, y, cache)
   ) |> sum()
 }
 
 
 run_counts(parsed_test) == 525152
 
+#Answer Part 2: 1_909_291_258_644
 run_counts(parsed_input)
+
