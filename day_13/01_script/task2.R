@@ -14,15 +14,16 @@ list_test <- parse_input(test)
 #or bottom based on whichever is shorter, and compare
 search_symmetry <- function(mtx) {
   r <- NA
-  for (i in 1:(nrow(mtx)-1)) {
+  for (i in 1:(nrow(mtx) - 1)) {
     #Flip top part
     top_mtx <- mtx[i:1, , drop = FALSE]
     bot_mtx <- mtx[(i + 1):nrow(mtx), , drop = FALSE]
     # Trimming off
     max_rows <- min(nrow(top_mtx), nrow(bot_mtx))
-    top_mtx <- top_mtx[1:max_rows,,drop = FALSE]
-    bot_mtx <- bot_mtx[1:max_rows,,drop = FALSE]
-    if (all(top_mtx == bot_mtx)) {
+    top_mtx <- top_mtx[1:max_rows, , drop = FALSE]
+    bot_mtx <- bot_mtx[1:max_rows, , drop = FALSE]
+    #if the difference is off by one then we found a smudge
+    if (sum(top_mtx != bot_mtx) == 1) {
       r <- i
     }
   }
@@ -36,6 +37,9 @@ find_rc <- function(mtx) {
   return(c(rows*100,cols))
 }
 
-vapply(list_test, find_rc, numeric(2)) |> sum(na.rm = TRUE) == 709
-#Answer Part 1: 30518
-vapply(list_input, find_rc, numeric(2)) |> sum(na.rm = TRUE)
+vapply(list_test, find_rc, numeric(2)) |>
+  sum(na.rm = TRUE) == 1400
+#Answer Part 2: 36735
+vapply(list_input, find_rc, numeric(2)) |>
+  sum(na.rm = TRUE)
+
