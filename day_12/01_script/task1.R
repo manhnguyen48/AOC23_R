@@ -31,7 +31,7 @@ check_config <- function(line, order) {
   for (i in 1:nrow(perm_unknown)) {
     tmp <- line
     tmp[current_unknown] <- perm_unknown[i, ]
-    encoded <- purler::rlenc(tmp)
+    encoded <- rlenc(tmp)
     translated <- encoded$lengths[which(encoded$values=="#")]
     if (length(translated) == length(order)) {
       if (all(translated == order)) {
