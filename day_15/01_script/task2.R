@@ -31,7 +31,7 @@ stack_lens <- function(lens) {
     }
     utils::sethash(h1, key, hash_value)
   }
-  #Calculating the focusing power of all lenses, order of key doesn't matter
+  #Calculating the focusing power of all lenses, order of boxes doesn't matter
   #Also we can skip box without any lenses
   total <-  0
   utils::maphash(h1, \(k, v) {
