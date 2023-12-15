@@ -22,14 +22,20 @@ set_up_day <- function(day) {
   # #Get the input file
   url <- paste0("https://adventofcode.com/2023/day/", day, "/input")
   session_cookie <- Sys.getenv("SESSION")
-  file_content <- httr2::request(url) |>
+  req <- httr2::request(url) |>
     httr2::req_headers(Cookie = paste0("session=", session_cookie)) |>
     httr2::req_cache(path = tempdir()) |>
-    httr2::req_perform() |>
-    httr2::resp_body_string() |>
-    strsplit("\\n")
-  readr::write_lines(file_content[[1]],
-                     file.path(main_dir,
-                               paste0(day_folder, "/", "00_input/input.txt")))
+    httr2::req_retry(max_tries = 5)
+
+  withCallingHandlers(
+    file_content <- httr2::req_perform(req) |>
+      httr2::resp_body_string() |>
+      strsplit("\\n") |> unlist() |>
+      readr::write_lines(file.path(main_dir,
+                                   paste0(day_folder, "/00_input/input.txt"))),
+    httr2_http_404 = function(cnd) {
+      rlang::abort("Couldn't find input data for the day", parent = cnd)
+    }
+  )
 }
 
