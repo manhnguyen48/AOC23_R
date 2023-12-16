@@ -185,3 +185,15 @@ Across all solutions, I try to make use of base R and tidyverse where relevant, 
 -   Part 2 was basically an introduction to hash tables and I took this opportunity to test out R `utils::hashtab` although it's still in experimental stage. It seems quite straightforward to me but you could've done part 2 with just a common list or vector. I suppose it's more useful when frequent data access and checks are needed. Reading/Understanding the problem was harder than the solution itself. It will be hard from now on though.
 
 </details>
+
+### Day 16: The Floor Will Be Lava
+
+<details>
+
+<summary>Details</summary>
+
+-   Part 1 was relative straightforward breadth first search of the 2D array. But we also need to store the position `(i,j)` in the matrix along with the direction of travel `c(0,1) c(1,0) c(-1,0) c(0,-1)` as we might hit the same tile in different directions. I was worried in Part 2 they would ask us to reposition the mirrors or the light bounce back from the edge.
+
+-   Part 2 was brute force again. I've tried `furrr::furrr_map_dbl` for parallelism but that doesn't seem to improve the speed. Parallel processing in R has a long way to go compared to other languages. You probably could skipped some starting points early if the mirrors are reflecting in a circle somehow.
+
+</details>
