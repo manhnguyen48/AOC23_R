@@ -186,7 +186,7 @@ Across all solutions, I try to make use of base R and tidyverse where relevant, 
 
 </details>
 
-### Day 16: The Floor Will Be Lava
+### **Day 16**: The Floor Will Be Lava
 
 <details>
 
@@ -195,5 +195,17 @@ Across all solutions, I try to make use of base R and tidyverse where relevant, 
 -   Part 1 was relative straightforward breadth first search of the 2D array. But we also need to store the position `(i,j)` in the matrix along with the direction of travel `c(0,1) c(1,0) c(-1,0) c(0,-1)` as we might hit the same tile in different directions. I was worried in Part 2 they would ask us to reposition the mirrors or the light bounce back from the edge.
 
 -   Part 2 was brute force again. I've tried `furrr::furrr_map_dbl` for parallelism but that doesn't seem to improve the speed. Parallel processing in R has a long way to go compared to other languages. You probably could skipped some starting points early if the mirrors are reflecting in a circle somehow.
+
+</details>
+
+### **Day 17**: Clumsy Crucible
+
+<details>
+
+<summary>Details</summary>
+
+-   Part 1 was quite interesting. I thought it would be the case like day 10 again where we use graph but turns out calculating the edge list for `igraph` might take more time as these consecutive number of steps could change and I would repeat some edge pairs when looping through the matrix. So I learned about the details of [Dijkstra's](https://en.wikipedia.org/wiki/Dijkstra's_algorithm) algorithm and how to customise it. Seems quite similar to the breadth first search yesterday and but we need to use a priority queue instead and `collections::priority_queue` was brilliant. Also we can assign any priority value explicitly by adding `-` to the current total heat loss value because it's a max-heap queue.
+
+-   Part 2 was relatively straightforward, we need to change a few parameters for the code: first the exit conditions is that we need to hit at least 4 consecutive steps; second is we can now take 10 steps at a time; and third is we need to hit minimum 4 consecutive steps before considering turning directions. Overall quite fun day!
 
 </details>
