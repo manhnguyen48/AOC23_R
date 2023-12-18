@@ -1,125 +1,75 @@
-library(tidyverse)
-library(testthat)
+input <- readr::read_file("day_05/00_input/input.txt")
+test <- readr::read_file("day_05/00_input/test.txt")
 
-input <- readLines("day_05/00_input/input.txt")
-test <- readLines("day_05/00_input/test.txt")
-
-seeds <- strsplit(stringr::str_extract(input[[1]],
-                                       pattern = "(?<=\\: ).*"), " ")[[1]] |>
-  as.numeric()
-
-test_seeds <- strsplit(stringr::str_extract(test[[1]],
-                                            pattern = "(?<=\\: ).*"), " ")[[1]] |>
-  as.numeric()
-
-#Function to extract the numbers into tibble
-extract_numbers <- function(number_set) {
-  strsplit(number_set, " ") |>
-    lapply(\(x) {
-      numbers <- as.numeric(x)
-      tibble::tibble(to = numbers[[1]],
-                     from = numbers[[2]],
-                     range = numbers[[3]])
-    }) |>
-    dplyr::bind_rows() |>
-    dplyr::arrange(from)
+#Changing the parsing of seeds so it's a 2 column matrix
+parse_input <- function(input_text) {
+  tmp <- strsplit(input_text, "(\r)?\n(\r)?\n")[[1]]
+  seeds <- stringi::stri_extract(tmp[1], regex="(?<=seeds\\: ).*") |>
+    strsplit(" ") |> unlist() |>  as.numeric()
+  starts <- seeds[seq(1, length(seeds), 2)]
+  ends <- starts + seeds[seq(2, length(seeds), 2)] - 1
+  seeds <- mapply(c, starts,ends, SIMPLIFY = FALSE)
+  maps <- list()
+  for (m in  tmp[2:length(tmp)]) {
+    splitted <- strsplit(m, ":(\r)?\n")[[1]]
+    map_name <- splitted[1]
+    map_values <- strsplit(splitted[2], "(\r)?\n")[[1]] |>
+      strsplit(" ")|>
+      stringi::stri_list2matrix(byrow=TRUE) |>
+      apply(2, as.numeric)
+    dimnames(map_values) <- list(NULL, c("to", "from", "range"))
+    #Order by the range of from values
+    maps[[map_name]] <- map_values[order(map_values[, "from"]), ]
+  }
+  return(list("seeds"=seeds, "maps"=maps))
 }
-#Function to extract the map data
-parse_maps <- function(input_map) {
-  #Get all map names and their location
-  map_names <- grep("[a-z]", input_map, value = TRUE)
-  map_names_idx <- c(grep("[a-z]",input_map), length(input_map))
-  number_set_idx <- lapply(1:(length(map_names_idx)-1),
-                           function(i) {
-                             if (i+1 != length(map_names_idx)) {
-                               seq(map_names_idx[i]+1, map_names_idx[i+1]-2)
-                             } else {
-                               seq(map_names_idx[i]+1, length(input_map))
-                             }
-                           }) |>
-    setNames(map_names)
-  out <- lapply(number_set_idx,
-                \(x) extract_numbers(input_map[x]))
+parsed_test <- parse_input(test)
+parsed_input <- parse_input(input)
+
+convert_ranges <- function(seeds_list, maps) {
+  #using queue here as it's easier to pop off one thing at a time
+  cur_ranges <- collections::queue(seeds_list)
+  for (map in maps) {
+    new_ranges <- collections::queue()
+    while (cur_ranges$size() > 0) {
+      cur_range <- cur_ranges$pop()
+      s_start <- cur_range[[1]]
+      s_end <- cur_range[[2]]
+      #Initiate a list in case we don't find any matches
+      matches <- list()
+      for (i in 1:nrow(map)) {
+        overlap_start <- max(s_start, map[i, "from"])
+        overlap_end <- min(s_end, map[i, "from"] + map[i, "range"])
+        #We could only find matches if the overlap start is smaller than overlap end
+        if (overlap_start < overlap_end) {
+          #Only map the ends here
+          new_range <- c(overlap_start - map[i, "from"] + map[i, "to"],
+                         overlap_end - map[i, "from"] + map[i, "to"])
+          matches <- append(matches, list(new_range))
+          if (overlap_start > s_start) {
+            #Update our current queue with the left hand side section
+            cur_ranges$push(c(s_start, overlap_start))
+          }
+          if (s_end > overlap_end) {
+            #Or the right hand side part
+            cur_ranges$push(c(overlap_end, s_end))
+          }
+          break
+        }
+      }
+      #If we don't find any matches then the range map to itself
+      if (length(matches) == 0) {
+        new_ranges$push(c(s_start, s_end))
+      } else {
+        lapply(matches, \(x) new_ranges$push(x))
+      }
+    }
+    cur_ranges <- new_ranges
+  }
+  out <- new_ranges$as_list() |> unlist() |> unname()
   return(out)
 }
-#Function to convert input given a dictionary
-convert_input <- function(input_number, dictionary) {
-  conversion <- dplyr::filter(dictionary,
-                              from <= input_number,
-                              (from + range - 1) >= input_number)
-  if (nrow(conversion) == 0) {
-    output_number <- input_number
-  } else if (nrow(conversion) == 1) {
-    output_number <- conversion[["to"]] + input_number - conversion[["from"]]
-  } else {
-    stop("We have more than 1 row of conversion")
-  }
-  return(output_number)
-}
-#Chaining the conversion across all the maps
-#They're sequential in map info
-chain_convert <- function(initial_seed, map_info) {
-  current_number <- initial_seed
-  for (i in seq_along(map_info)) {
-    current_number <- convert_input(current_number, map_info[[i]])
-  }
-  return(current_number)
-}
 
-#TODO: perhaps we need only test the ends here
-# Need to calculate the ends of each map and intersect each other
-
-#Function to convert a range of numbers to ranges of numbers
-convert_range <- function(x, dictionary) {
-  out <- dplyr::rowwise(dictionary) |>
-    dplyr::mutate(
-      end = from+range-1,
-      pairs = dplyr::case_when(
-        #Outside range
-        (end<x[1] | from > x[2]) ~ c(NA,NA),
-        #Completely inside range
-        (from<=x[1] & end >= x[2]) ~ c(to+x[1]-from, to+x[2]-from),
-        #Partial overlap left
-        (from>=x[1] & end >= x[2]) ~ c(to, to+x[2]-from),
-        #Partial overlap right
-        (from<=x[1] & end >= x[1] & end <= x[2]) ~ c(to+x[1]-from, to+range-1)) |>
-        list(),
-      not_found = all(!is.na(pairs))) |>
-    dplyr::filter(not_found) |>
-    dplyr::pull(pairs)
-  if (length(out)==0) {
-    return(x)
-  } else {
-    return(out)
-  }
-}
-
-# chain_convert_range <- function(initial_pairs, map_info) {
-#   current_range <- initial_pairs
-#   for (i in seq_along(map_info)) {
-#     current_range <- append(current_range, convert_range())
-#   }
-# }
-
-seed_start <- seeds[seq(1,length(seeds)-1, 2)]
-seed_rng <- seeds[seq(2, length(seeds), 2)]
-
-for (i in seq_along(seed_start)) {
-  cur_range <- list(c(seed_start[i], seed_start[i]+seed_rng[i]))
-}
-
-
-
-test_map_info <- parse_maps(test[2:length(test)])
-
-map_info <- parse_maps(input[2:length(input)])
-
-
-
-convert_range(c(79, 92), test_map_info[[1]]) |>
-  lapply(\(x) convert_range(x, test_map_info[[2]])) |>
-  lapply(\(x) convert_range(x, test_map_info[[3]])) |>
-  lapply(\(x) convert_range(x, test_map_info[[4]]))
-
-
-
+convert_ranges(parsed_test$seeds, parsed_test$maps) |> min() == 46
+#Answer Part 2: 47909639
+convert_ranges(parsed_input$seeds, parsed_input$maps) |> min()
