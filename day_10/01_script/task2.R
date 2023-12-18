@@ -20,9 +20,9 @@ shoelace <- function(ordered_names) {
   return(inside)
 }
 
-#Manually reorder the first few pipesso we would go in 1 direction
-tmp <- dfs_traverse(parsed_test, c(2,2))
-shoelace(tmp[c(2, 1, 3:length(tmp))]) == 4
+#Manually reorder the first few pipes so we would go in 1 direction
+dfs_traverse(parsed_test, as.numeric(which(parsed_test=="S", TRUE))) |>
+  shoelace() == 4
 #Answer Part 2: 423
-tmp2 <- dfs_traverse(parsed_input, c(77,110))
-shoelace(tmp2[c(2,1,3:length(tmp2))])
+dfs_traverse(parsed_input, as.numeric(which(parsed_input=="S", TRUE))) |>
+  shoelace()

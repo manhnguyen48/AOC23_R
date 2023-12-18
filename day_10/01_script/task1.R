@@ -14,3 +14,4 @@ parsed_input <- parse_input(input)
 (length(dfs_traverse(parsed_input,
                      as.numeric(which(parsed_input == "S", TRUE)))))/2
 
+

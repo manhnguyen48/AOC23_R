@@ -24,6 +24,7 @@ dfs_traverse <- function(mtx, starting) {
       seen <- c(seen, paste0(x - 1, "_", y))
       seen_hash[[paste0(x - 1, "_", y)]] <- TRUE
       stack$push(c(x - 1, y))
+      next
     }
     #Going down
     if (x < nrow(mtx) &&
@@ -34,6 +35,7 @@ dfs_traverse <- function(mtx, starting) {
       seen <- c(seen, paste0(x + 1, "_", y))
       seen_hash[[paste0(x + 1, "_", y)]] <- TRUE
       stack$push(c(x + 1, y))
+      next
     }
     #Going left
     if (y > 1 &&
@@ -44,6 +46,7 @@ dfs_traverse <- function(mtx, starting) {
       seen <- c(seen, paste0(x , "_", y-1))
       seen_hash[[paste0(x , "_", y-1)]] <- TRUE
       stack$push(c(x, y - 1))
+      next
     }
     #Going right
     if (y < ncol(mtx) &&
@@ -54,6 +57,7 @@ dfs_traverse <- function(mtx, starting) {
       seen <- c(seen, paste0(x , "_", y+1))
       seen_hash[[paste0(x , "_", y+1)]] <- TRUE
       stack$push(c(x, y + 1))
+      next
     }
   }
   return(seen)
