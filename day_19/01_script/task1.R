@@ -37,11 +37,8 @@ parsed_input <- parse_input(input)
 #Recursive function to check the rules
 follow_rule <- function(step_name, part_spec, wf) {
   #Stop condition if we arrive at classification
-  if (step_name == "A") {
-    return(TRUE)
-  } else if (step_name == "R") {
-    return(FALSE)
-  }
+  if (step_name == "A") return(TRUE)
+  if (step_name == "R") return(FALSE)
   ruleset <- wf[[step_name]][["ruleset"]]
   fallback <- wf[[step_name]][["fallback"]]
   #Looping through rules to find the next target to go to
@@ -63,9 +60,10 @@ sort_parts <- function(input_list) {
   parts <- input_list[["parts"]]
   #This will return boolean vectors indicating if part passes the checks
   classification <- apply(parts, 1, \(x) follow_rule("in", x, wf))
-  parts[classification,] |> rowSums() |> sum()
+  parts[classification,] |> sum()
 }
 
 sort_parts(parsed_test) == 19114
 #Answer Part 1: 495298
 sort_parts(parsed_input)
+
