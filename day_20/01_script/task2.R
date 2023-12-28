@@ -23,20 +23,35 @@ parse_input <- function(input_text) {
     for (target_name in node[["targets"]]) {
       if (target_name %in% names(out) &&
           out[[target_name]][["type"]] == "&") {
-        out[[target_name]][["in_value"]] <- c(out[[target_name]][["in_value"]],
-                                           setNames(FALSE, nm = node[["name"]]))
+        out[[target_name]][["in_value"]] <-
+          c(out[[target_name]][["in_value"]],
+            setNames(FALSE, nm = node[["name"]]))
       }
     }
   }
   return(list("broadcast_targets" = broadcast_targets,
               "nodes" = out))
 }
-#Use a queue to handle pulses order
-send_pulses <- function(data, presses = 1000) {
-  pulses <- c()
-  for (i in 1:presses) {
+parsed_test <- parse_input(test)
+parsed_input <- parse_input(input)
+
+
+find_cycle_length <- function(data) {
+  #There should be only one node feeding directly into rx and it should be a
+  #conjunction node;
+  rx_direct_feed <- Find(\(x) {"rx" %in% x[["targets"]]}, data$nodes)[["name"]]
+  #Find out which nodes are 2 steps away from the rx node;
+  rx_indirect_feed <- Filter(\(x) {rx_direct_feed %in% x[["targets"]]}, data$nodes) |>
+    names()
+  #Because the node feeding directly we just need to see how many cycles does it take
+  #each indirect nodes to turn to low
+  cycles <- setNames(rep(NA, length(rx_indirect_feed)), rx_indirect_feed)
+  seen <- setNames(rep(0, length(rx_indirect_feed)), rx_indirect_feed)
+  presses <- 0
+
+  while (TRUE) {
+    presses <- presses + 1
     #From the button
-    pulses <- c(pulses, FALSE)
     queue <- collections::deque()
     #Initial pulse
     for (target in data[["broadcast_targets"]]) {
@@ -47,12 +62,19 @@ send_pulses <- function(data, presses = 1000) {
       origin_node <- next_pulse[[1]]
       target_node <- next_pulse[[2]]
       pulse_value <- next_pulse[[3]]
-      pulses <- c(pulses, unname(pulse_value))
       #Skip if we don't have a logic node
       if (!(target_node %in% names(data[["nodes"]])) ) {next}
       #If we have high pulse and a target node of %, skip the pulse entirely
       if (data$nodes[[target_node]]$type == "%" & pulse_value) {
         next
+      }
+      if (target_node == rx_direct_feed && pulse_value == TRUE) {
+        seen[[origin_node]] <- seen[[origin_node]] + 1
+        if (is.na(cycles[[origin_node]])) {
+          cycles[[origin_node]] <- presses }
+        if (all(!is.na(cycles))) {
+          return(Reduce(pracma::Lcm, cycles))
+        }
       }
       #Performing the pulse here
       data[["nodes"]][[target_node]]$pulse(pulse_value)
@@ -65,13 +87,7 @@ send_pulses <- function(data, presses = 1000) {
       }
     }
   }
-  return(pulses)
 }
 
-parsed_test <- parse_input(test)
-parsed_input <- parse_input(input)
-
-send_pulses(parsed_test) |> table() |> prod() == 11687500
-#Answer Part 1: 866_435_264
-send_pulses(parsed_input) |> table() |> prod()
-
+#Answer Part 2: 229_215_609_826_339
+find_cycle_length(parsed_input)

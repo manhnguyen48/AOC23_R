@@ -47,14 +47,10 @@ bfs <- function(mtx, starting, num_steps = 64) {
       queue$push(c(nx, ny, s-1))
     }
   }
-  return(out)
+  return(length(names(out)))
 }
 
-bfs(parsed_test,
-    which(parsed_test == "S", TRUE) |> as.numeric(),
-    6) |> names() |> length() == 16
-
+bfs(parsed_test, which(parsed_test == "S", TRUE), 6)  == 16
 #Answer Part 1: 3858
-bfs(parsed_input,
-    which(parsed_input == "S", TRUE) |> as.numeric(),
-    64) |> names() |> length()
+bfs(parsed_input, which(parsed_input == "S", TRUE), 64)
+
