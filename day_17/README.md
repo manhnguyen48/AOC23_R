@@ -1,0 +1,5 @@
+### **Day 17**: Clumsy Crucible
+
+-   Part 1 was quite interesting. I thought it would be the case like day 10 again where we use graph but turns out calculating the edge list for `igraph` might take more time as these consecutive number of steps could change and I would repeat some edge pairs when looping through the matrix. So I learned about the details of [Dijkstra's](https://en.wikipedia.org/wiki/Dijkstra's_algorithm) algorithm and how to customise it. Seems quite similar to the breadth first search yesterday and but we need to use a priority queue instead and `collections::priority_queue` was brilliant. Also we can assign any priority value explicitly by adding `-` to the current total heat loss value because it's a max-heap queue.
+
+-   Part 2 was relatively straightforward, we need to change a few parameters for the code: first the exit conditions is that we need to hit at least 4 consecutive steps; second is we can now take 10 steps at a time; and third is we need to hit minimum 4 consecutive steps before considering turning directions. Overall quite fun day!

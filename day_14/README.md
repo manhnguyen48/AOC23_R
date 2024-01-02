@@ -1,0 +1,5 @@
+### **Day 14**: Parabolic Reflector Dish
+
+-   Part 1 Was relatively straightforward, I imagined the tilting operation would be for each column, treat it as a single string, split it by the `"#"` character, the reorder the individual smaller parts. Then to calculate the load on the north side, we search the row indices of all the `O` then reverse code it based on the number of rows; and add everything together.
+
+-   Part 2 was a lot of work, but I'm relieved I can reuse most of part 1, I was worrying the space between rocks would expand like they did with the universe problem on day 11 and make part 1 obsolete. First we need a function the would perform a cycle: North \> West \> South \> East means we're in loop of counter clockwise. Because of the rocks, we have a sets of bigger cycles where we would run into the same states i.e. the mirrors would "settle" into some position. Therefore, it's a case of keep cycling and recording the unique states we've run into. I capture a state by concatenate the whole matrix into a single string and also record the index of when we run into them.
